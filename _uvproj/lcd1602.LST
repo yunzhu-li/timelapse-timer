@@ -1,0 +1,139 @@
+C51 COMPILER V9.00   LCD1602                                                               01/10/2012 19:01:31 PAGE 1   
+
+
+C51 COMPILER V9.00, COMPILATION OF MODULE LCD1602
+OBJECT MODULE PLACED IN lcd1602.OBJ
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE lcd1602.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          #include <XSTC89.h>
+   2          #include <delayms.h>
+   3          
+   4          
+   5          
+   6          sbit RS=P2^4;
+   7          sbit RW=P2^5;
+   8          sbit E=P2^6;
+   9          
+  10          
+  11          char data chr1;
+  12          
+  13          
+  14          
+  15          void writecmd(unsigned char cmd)
+  16          {
+  17   1              DelayMs(1);
+  18   1              E=0;
+  19   1              RS=0;
+  20   1              RW=0;
+  21   1              //_nop_();
+  22   1              E=1;
+  23   1              P0=cmd;
+  24   1              E=0;
+  25   1              RS=0;
+  26   1      
+  27   1      }
+  28          
+  29          void writedata(unsigned char dat)
+  30          {
+  31   1              DelayMs(1);
+  32   1              E=0;
+  33   1              RS=1;
+  34   1              RW=0;
+  35   1              //_nop_();
+  36   1              E=1;
+  37   1              P0=dat;
+  38   1              E=0;
+  39   1              RS=0;
+  40   1      
+  41   1      }
+  42          
+  43          void showchar(unsigned char pos,unsigned char chr)
+  44          {
+  45   1              unsigned char p;
+  46   1              if (pos>=0x10)
+  47   1              p=pos+0xb0; //是第二行则命令代码高4位为
+  48   1              else 
+  49   1              p=pos+0x80; //是第二行则命令代码高4位为
+  50   1              
+  51   1              writecmd (p);//写命令
+  52   1              writedata (chr);   //写数据
+  53   1      
+  54   1      }
+  55          
+C51 COMPILER V9.00   LCD1602                                                               01/10/2012 19:01:31 PAGE 2   
+
+  56          void lcdshowstring(unsigned char line,char *ptr)
+  57          {
+  58   1      
+  59   1              unsigned char pos;
+  60   1              int i;
+  61   1              
+  62   1              //pos+=(line*0x10);
+  63   1              pos=0x10*line;
+  64   1      
+  65   1      
+  66   1              for (i=0;i<16;i++)
+  67   1      
+  68   1                      showchar(pos++,*(ptr+i));
+  69   1      
+  70   1      }
+  71          
+  72          void lcdinit()
+  73          {
+  74   1              DelayMs(10);
+  75   1              writecmd(0x38); //display mode
+  76   1              writecmd(0x38); //display mode
+  77   1              writecmd(0x38); //display mode
+  78   1              writecmd(0x06); //显示光标移动位置
+  79   1              writecmd(0x0c); //显示开及光标设置
+  80   1              writecmd(0x01); //显示清屏
+  81   1      
+  82   1      }
+  83          
+  84          /*
+  85          void main()
+  86          {
+  87                  int j,k;
+  88                  j=32;k=0x10;
+  89          
+  90                  lcdinit();
+  91                  
+  92                  sprintf(str1,"-FAT LYZ-       ");
+  93                  lcdshowstring(0,str1);
+  94                  sprintf(str1,"LCD1602 LCD1602 ");
+  95                  lcdshowstring(1,str1);
+  96          
+  97                  
+  98                  while(j<256)
+  99                          {
+ 100                                  
+ 101                                  showchar(k++,j);
+ 102                                  P1=j++;
+ 103                                  if (k==0x20) k=0x10;
+ 104                                  DelayMs(30);
+ 105                                  
+ 106                          }
+ 107                          
+ 108                  while(1);
+ 109                          
+ 110                  
+ 111          }
+ 112          */
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    170    ----
+   CONSTANT SIZE    =   ----    ----
+C51 COMPILER V9.00   LCD1602                                                               01/10/2012 19:01:31 PAGE 3   
+
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      1      10
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,201 @@
+C51 COMPILER V9.00   FATCAMTIMER                                                           01/10/2012 19:56:12 PAGE 1   
+
+
+C51 COMPILER V9.00, COMPILATION OF MODULE FATCAMTIMER
+OBJECT MODULE PLACED IN fatcamtimer.OBJ
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE fatcamtimer.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1                  
+   2          #include <XSTC89.H>
+   3          #include <stdio.h>
+   4          #include <lcd1602.h>
+   5          #include <delayms.h>
+   6          
+   7          
+   8          unsigned int _setTime;
+   9          unsigned int _remainingTime;
+  10          unsigned int _timerStatus;
+  11          
+  12          
+  13          
+  14          
+  15          void _showNum(char _row)
+  16          {
+  17   1              char _msg[32];
+  18   1      
+  19   1              if(!_row){
+  20   2                      //Print SetTime
+  21   2                      if(_setTime < 10){
+  22   3                              sprintf(_msg, "SET TIMER: %d s  ", _setTime);
+  23   3                      }else
+  24   2                      if(_setTime >= 10 && _setTime <= 99){
+  25   3                              sprintf(_msg, "SET TIMER: %d s ", _setTime);
+  26   3                      }else
+  27   2                      if(_setTime > 99){
+  28   3                              sprintf(_msg, "SET TIMER: %d s", _setTime);
+  29   3                      }
+  30   2                      lcdshowstring(0, _msg); 
+  31   2              }
+  32   1              
+  33   1              if(_row){
+  34   2                      if(!_timerStatus){
+  35   3                              sprintf(_msg, "    OFF         ", _remainingTime);
+  36   3                      }else{
+  37   3                              //Print RemainingTime
+  38   3                              if(_remainingTime < 10){
+  39   4                                      sprintf(_msg, "    ON     %d s  ", _remainingTime);
+  40   4                              }else
+  41   3                              if(_remainingTime >= 10 && _remainingTime <= 99){
+  42   4                                      sprintf(_msg, "    ON     %d s ", _remainingTime);              
+  43   4                              }else
+  44   3                              if(_remainingTime > 99){
+  45   4                                      sprintf(_msg, "    ON     %d s", _remainingTime);       
+  46   4                              }
+  47   3                      }
+  48   2                      lcdshowstring(1, _msg); 
+  49   2              }
+  50   1      
+  51   1      }
+  52          
+  53          void _releaseShutter()
+  54          {
+  55   1              char _msg[32];
+C51 COMPILER V9.00   FATCAMTIMER                                                           01/10/2012 19:56:12 PAGE 2   
+
+  56   1      
+  57   1              sprintf(_msg, "    ON  R  0 s  ");
+  58   1              lcdshowstring(1, _msg); 
+  59   1              P1_5 = 0x01;
+  60   1              DelayMs(100);
+  61   1              P1_5 = 0x00;
+  62   1      
+  63   1      
+  64   1      }
+  65          
+  66          
+  67          void _timerFunc()
+  68          {
+  69   1              unsigned char _lastCtrlKeyStat;
+  70   1              _lastCtrlKeyStat = 1;
+  71   1      
+  72   1              _remainingTime++;
+  73   1              
+  74   1              while(1)
+  75   1              {
+  76   2                      if(!--_remainingTime){
+  77   3                      _releaseShutter();
+  78   3                      _remainingTime = _setTime;
+  79   3                      }
+  80   2                      if((_lastCtrlKeyStat == 0) && (P1_2 == 0x00)){break;}
+  81   2                      _lastCtrlKeyStat = P1_2;
+  82   2                      showNum(1);
+  83   2                      DelayMs(1000);
+  84   2              }
+  85   1              
+  86   1              _timerStatus = 0;
+  87   1              showNum(1);
+  88   1              
+  89   1              DelayMs(2000);
+  90   1              
+  91   1      }
+  92          
+  93          
+  94          void main()
+  95          {
+  96   1              char _msg[32];
+  97   1                      
+  98   1              P1_5 = 0x00;
+  99   1                      
+ 100   1              _setTime = 10;
+ 101   1              _remainingTime = 20;
+ 102   1              _timerStatus = 0;
+ 103   1      
+ 104   1              lcdinit();
+ 105   1      
+ 106   1      
+ 107   1              
+ 108   1              sprintf(_msg, "FAT TIMER Ver 2 ");
+ 109   1              lcdshowstring(0, _msg); 
+ 110   1              sprintf(_msg, "Starting...     ");
+ 111   1              lcdshowstring(1, _msg); 
+ 112   1      
+ 113   1              DelayMs(2000);
+ 114   1      
+ 115   1              _showNum(0);
+ 116   1              _showNum(1);
+ 117   1      
+C51 COMPILER V9.00   FATCAMTIMER                                                           01/10/2012 19:56:12 PAGE 3   
+
+ 118   1      
+ 119   1              while(1)
+ 120   1              {
+ 121   2                      //Start / Stop
+ 122   2                      if(P1_2 == 0x00)
+ 123   2                      {
+ 124   3                              DelayMs(2);
+ 125   3                              if(P1_2 == 0x00){
+ 126   4                                      _timerStatus = 1;
+ 127   4                                      _remainingTime = _setTime;
+ 128   4                                      showNum(1);
+ 129   4                                      _timerFunc();
+ 130   4                              }
+ 131   3                      }
+ 132   2                      
+ 133   2              
+ 134   2              
+ 135   2              
+ 136   2                      //+ / -
+ 137   2                      if(P1_0 == 0x00)
+ 138   2                      {
+ 139   3                              DelayMs(2);
+ 140   3                              if(P1_0 == 0x00)
+ 141   3                                      {
+ 142   4                                              if(_setTime > 1)
+ 143   4                                              {
+ 144   5                                                      _setTime--;
+ 145   5                                                      showNum(0);
+ 146   5                                                      DelayMs(15);
+ 147   5                                                      continue;
+ 148   5                                              }
+ 149   4                                      }
+ 150   3                      }else
+ 151   2                      if(P1_1 == 0x00)
+ 152   2                              DelayMs(2);
+ 153   2                              if(P1_1 == 0x00)
+ 154   2                                      {
+ 155   3                                              if(_setTime < 999)
+ 156   3                                              {
+ 157   4                                                      _setTime++;
+ 158   4                                                      showNum(0);
+ 159   4                                                      DelayMs(15);
+ 160   4                                                      continue;
+ 161   4                                              }
+ 162   3                                      }
+ 163   2              }//while
+ 164   1      
+ 165   1      }
+ 166          
+ 167          
+ 168          
+ 169          
+ 170          
+ 171          
+ 172          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    578    ----
+   CONSTANT SIZE    =    170    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+C51 COMPILER V9.00   FATCAMTIMER                                                           01/10/2012 19:56:12 PAGE 4   
+
+   DATA SIZE        =      6      98
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

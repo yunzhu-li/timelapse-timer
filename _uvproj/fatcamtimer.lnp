@@ -1,0 +1,4 @@
+"fatcamtimer.obj",
+"lcd1602.obj",
+"delayms.obj" 
+TO "fatcamtimer" 
